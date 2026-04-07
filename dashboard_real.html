@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>💎 Kodas Bot — Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{--gold:#FFD700;--dg:#B8860B;--bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a27;--bg4:#22223a;--tx:#e8e8f0;--tx2:#9999bb;--bd:#2a2a45;--ok:#00c957;--er:#dc143c;--wn:#ffa500;--inf:#4169e1;--pu:#7b2fbe}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',sans-serif;min-height:100vh}
+header{background:linear-gradient(135deg,var(--bg2),var(--bg3));border-bottom:1px solid var(--bd);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100}
+.logo{font-size:1.25rem;font-weight:700}.logo span{background:linear-gradient(135deg,var(--gold),var(--dg));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hstats{display:flex;gap:2rem}.hstat .val{font-size:1.1rem;font-weight:700;color:var(--gold)}.hstat .lbl{font-size:.7rem;color:var(--tx2);text-transform:uppercase}
+.container{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 64px)}
+nav{background:var(--bg2);border-right:1px solid var(--bd);padding:1.5rem 0;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto}
+.ns{padding:.5rem 1rem;font-size:.7rem;color:var(--tx2);text-transform:uppercase;letter-spacing:1px;margin-top:1rem}
+nav a{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.25rem;color:var(--tx2);text-decoration:none;font-size:.9rem;transition:.15s;border-left:3px solid transparent;margin:.1rem 0;cursor:pointer}
+nav a:hover,nav a.active{color:var(--tx);background:var(--bg3);border-left-color:var(--gold)}
+nav a.active{color:var(--gold)}
+main{padding:2rem;overflow-x:hidden}
+.page{display:none}.page.active{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:1.25rem;position:relative;overflow:hidden;transition:.2s}
+.card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--dg))}
+.card .icon{font-size:2rem;margin-bottom:.5rem}.card .val{font-size:2rem;font-weight:800;color:var(--gold)}.card .lbl{font-size:.8rem;color:var(--tx2);margin-top:.25rem}
+.tw{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:2rem}
+.th{padding:1rem 1.5rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.th h3{font-size:1rem}
+table{width:100%;border-collapse:collapse}
+th{padding:.75rem 1.5rem;text-align:left;font-size:.75rem;color:var(--tx2);text-transform:uppercase;border-bottom:1px solid var(--bd);background:var(--bg3)}
+td{padding:.85rem 1.5rem;font-size:.875rem;border-bottom:1px solid rgba(255,255,255,.04)}
+tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg3)}
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:6px;font-size:.75rem;font-weight:600}
+.bg{background:rgba(0,201,87,.15);color:var(--ok)}.br{background:rgba(220,20,60,.15);color:var(--er)}.by{background:rgba(255,165,0,.15);color:var(--wn)}.bb{background:rgba(65,105,225,.15);color:var(--inf)}.bgo{background:rgba(255,215,0,.15);color:var(--gold)}.bpu{background:rgba(123,47,190,.15);color:#a855f7}
+.progress{background:var(--bg4);border-radius:99px;height:8px;overflow:hidden}
+.pb{height:100%;background:linear-gradient(90deg,var(--gold),var(--dg));border-radius:99px;transition:.5s}
+.cw{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:1.5rem;margin-bottom:2rem}
+.ct{font-size:1rem;font-weight:600;margin-bottom:1rem}
+canvas{width:100%!important;max-height:250px}
+.st{font-size:1.5rem;font-weight:700;margin-bottom:1.5rem;display:flex;align-items:center;gap:.5rem}
+.st span{color:var(--gold)}
+.btn{padding:.5rem 1rem;border-radius:8px;border:none;cursor:pointer;font-size:.875rem;font-weight:600;transition:.15s}
+.btg{background:linear-gradient(135deg,var(--gold),var(--dg));color:#000}.btg:hover{opacity:.9}
+.bto{background:transparent;border:1px solid var(--bd);color:var(--tx)}.bto:hover{border-color:var(--gold);color:var(--gold)}
+.btr{background:rgba(220,20,60,.2);color:var(--er);border:1px solid var(--er)}
+.btgr{background:rgba(0,201,87,.2);color:var(--ok);border:1px solid var(--ok)}
+input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:.6rem .9rem;color:var(--tx);font-size:.875rem;outline:none;transition:.15s}
+input:focus,select:focus{border-color:var(--gold)}
+.fg{margin-bottom:1rem}label{display:block;font-size:.8rem;color:var(--tx2);margin-bottom:.35rem}
+.pg{background:var(--bg4);border-radius:12px;overflow:hidden;margin-bottom:2rem}
+.pgitem{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.pgpos{font-size:1.25rem;width:2rem;text-align:center}.pgav{width:36px;height:36px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center}
+.pgname{flex:1;font-weight:600}.pgval{color:var(--gold);font-weight:700}.pgbar{width:80px}
+.tc{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:1.25rem;margin-bottom:1rem;transition:.2s}
+.tc:hover{border-color:var(--gold)}
+.tch{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.tid{font-weight:700;color:var(--gold)}.tbody{font-size:.875rem;color:var(--tx2);margin-bottom:.75rem}
+.tfoot{display:flex;align-items:center;gap:.75rem;font-size:.75rem;color:var(--tx2)}
+.pgd{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:2rem}
+.pc{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:1.25rem;transition:.2s;position:relative}
+.pc:hover{border-color:var(--gold)}
+.pe{font-size:2.5rem;margin-bottom:.75rem}.pn{font-size:1rem;font-weight:700;margin-bottom:.25rem}
+.pd{font-size:.8rem;color:var(--tx2);margin-bottom:.75rem}
+.pp{display:flex;align-items:center;gap:.5rem}
+.pnew{font-size:1.25rem;font-weight:800;color:var(--gold)}.pold{font-size:.875rem;color:var(--tx2);text-decoration:line-through}
+.pdisc{font-size:.75rem;background:rgba(0,201,87,.15);color:var(--ok);padding:.1rem .4rem;border-radius:4px}
+.pstock{position:absolute;top:1rem;right:1rem}
+.ld{display:flex;align-items:center;justify-content:center;height:200px;flex-direction:column;gap:1rem}
+.sp{width:36px;height:36px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#toast{position:fixed;bottom:2rem;right:2rem;background:var(--bg3);border:1px solid var(--gold);border-radius:10px;padding:.75rem 1.25rem;font-size:.875rem;z-index:1000;transform:translateY(100px);opacity:0;transition:.3s;max-width:300px}
+#toast.show{transform:translateY(0);opacity:1}
+.sr{display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.sr:last-child{border-bottom:none}.sr .name{font-size:.875rem;color:var(--tx2)}.sr .val{font-weight:700}
+.guild-sel{background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:.4rem .8rem;color:var(--tx);font-size:.875rem;cursor:pointer;margin-left:auto}
+.refresh-btn{background:transparent;border:1px solid var(--bd);border-radius:8px;padding:.4rem .8rem;color:var(--tx2);font-size:.8rem;cursor:pointer;transition:.15s}
+.refresh-btn:hover{border-color:var(--gold);color:var(--gold)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">💎 <span>Kodas Bot</span> — Dashboard</div>
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <select class="guild-sel" id="guild-select" onchange="changeGuild(this.value)">
+      <option value="0">Kraunama...</option>
+    </select>
+    <button class="refresh-btn" onclick="refreshAll()">🔄 Atnaujinti</button>
+  </div>
+  <div class="hstats">
+    <div class="hstat"><div class="val" id="h-members">-</div><div class="lbl">Nariai</div></div>
+    <div class="hstat"><div class="val" id="h-orders">-</div><div class="lbl">Užsakymai</div></div>
+    <div class="hstat"><div class="val" id="h-tickets">-</div><div class="lbl">Ticketai</div></div>
+    <div class="hstat"><div class="val" id="h-coins">-</div><div class="lbl">Monetos</div></div>
+  </div>
+</header>
+<div class="container">
+  <nav>
+    <div class="ns">Pagrindinis</div>
+    <a onclick="showPage('dashboard',this)" class="active">📊 Dashboard</a>
+    <a onclick="showPage('stats',this)">📈 Statistika</a>
+    <div class="ns">Serveris</div>
+    <a onclick="showPage('members',this)">👥 Nariai</a>
+    <a onclick="showPage('leaderboard',this)">🏆 Lyderiai</a>
+    <a onclick="showPage('tickets',this)">🎫 Ticketai</a>
+    <div class="ns">Parduotuvė</div>
+    <a onclick="showPage('shop',this)">🛍️ Produktai</a>
+    <a onclick="showPage('orders',this)">📦 Užsakymai</a>
+    <div class="ns">Ekonomika</div>
+    <a onclick="showPage('economy',this)">💰 Ekonomika</a>
+    <a onclick="showPage('bank',this)">🏦 Bankas</a>
+    <div class="ns">Admin</div>
+    <a onclick="showPage('moderation',this)">🛡️ Moderavimas</a>
+    <a onclick="showPage('settings',this)">⚙️ Nustatymai</a>
+  </nav>
+  <main>
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="st">📊 <span>Dashboard</span></div>
+      <div class="cards">
+        <div class="card"><div class="icon">👥</div><div class="val" id="c-members">-</div><div class="lbl">Nariai</div></div>
+        <div class="card"><div class="icon">💰</div><div class="val" id="c-coins">-</div><div class="lbl">Viso monetų</div></div>
+        <div class="card"><div class="icon">🎫</div><div class="val" id="c-tickets">-</div><div class="lbl">Atviri ticketai</div></div>
+        <div class="card"><div class="icon">📦</div><div class="val" id="c-orders">-</div><div class="lbl">Laukia užsakymų</div></div>
+        <div class="card"><div class="icon">⚠️</div><div class="val" id="c-warns">-</div><div class="lbl">Perspėjimai</div></div>
+        <div class="card"><div class="icon">🛍️</div><div class="val" id="c-products">-</div><div class="lbl">Produktai</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="cw"><div class="ct">💰 Ekonomikos pasiskirstymas</div><canvas id="chart-eco"></canvas></div>
+        <div class="cw"><div class="ct">🎫 Ticketų statusai</div><canvas id="chart-tickets"></canvas></div>
+      </div>
+      <div class="tw">
+        <div class="th"><h3>📦 Paskutiniai užsakymai</h3><button class="btn bto" onclick="showPage('orders',document.querySelector('[onclick*=orders]'))">Visi →</button></div>
+        <table><thead><tr><th>#</th><th>Narys</th><th>Produktas</th><th>Kaina</th><th>Statusas</th><th>Data</th><th>Veiksmai</th></tr></thead>
+        <tbody id="recent-orders"></tbody></table>
+      </div>
+    </div>
+
+    <!-- NARIAI -->
+    <div class="page" id="page-members">
+      <div class="st">👥 <span>Nariai</span></div>
+      <div style="display:flex;gap:1rem;margin-bottom:1.5rem;">
+        <input type="text" id="member-search" placeholder="🔍 Ieškoti..." oninput="filterMembers(this.value)" style="max-width:280px;">
+        <select id="member-sort" onchange="loadMembers()" style="max-width:180px;">
+          <option value="xp">XP</option><option value="coins">Monetos</option><option value="rep">Reputacija</option><option value="message_count">Žinutės</option>
+        </select>
+        <button class="btn btg" onclick="loadMembers()">🔄 Atnaujinti</button>
+      </div>
+      <div class="tw">
+        <table><thead><tr><th>ID</th><th>Lygis</th><th>XP</th><th>Monetos</th><th>Rep</th><th>Streak</th><th>Žinutės</th><th>Bankas</th></tr></thead>
+        <tbody id="members-table"><tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--tx2)">Kraunama...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- LYDERIAI -->
+    <div class="page" id="page-leaderboard">
+      <div class="st">🏆 <span>Lyderiai</span></div>
+      <div style="display:flex;gap:.75rem;margin-bottom:1.5rem;">
+        <button class="btn btg"  onclick="loadLB('xp')">⚡ XP</button>
+        <button class="btn bto"  onclick="loadLB('coins')">💰 Monetos</button>
+        <button class="btn bto"  onclick="loadLB('rep')">⭐ Reputacija</button>
+      </div>
+      <div class="pg" id="lb-wrap"><div class="ld"><div class="sp"></div><span>Kraunama...</span></div></div>
+    </div>
+
+    <!-- TICKETAI -->
+    <div class="page" id="page-tickets">
+      <div class="st">🎫 <span>Ticketai</span></div>
+      <div class="cards">
+        <div class="card"><div class="icon">🟢</div><div class="val" id="t-open">-</div><div class="lbl">Atviri</div></div>
+        <div class="card"><div class="icon">🔒</div><div class="val" id="t-closed">-</div><div class="lbl">Uždaryti</div></div>
+        <div class="card"><div class="icon">⏱️</div><div class="val" id="t-avg">-</div><div class="lbl">Vid. laikas</div></div>
+        <div class="card"><div class="icon">⭐</div><div class="val" id="t-rating">-</div><div class="lbl">Vid. įvertinimas</div></div>
+      </div>
+      <div style="display:flex;gap:.75rem;margin-bottom:1.5rem;">
+        <button class="btn btg"  onclick="loadTickets('open')">🟢 Atviri</button>
+        <button class="btn bto"  onclick="loadTickets('closed')">🔒 Uždaryti</button>
+        <button class="btn bto"  onclick="loadTickets('all')">📋 Visi</button>
+      </div>
+      <div id="tickets-list"><div class="ld"><div class="sp"></div><span>Kraunama...</span></div></div>
+    </div>
+
+    <!-- PARDUOTUVĖ -->
+    <div class="page" id="page-shop">
+      <div class="st">🛍️ <span>Produktai</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <span id="products-count" style="color:var(--tx2)">Kraunama...</span>
+        <button class="btn btg" onclick="toggleAddProduct()">+ Pridėti</button>
+      </div>
+      <div id="add-product-form" style="display:none;background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;">
+        <h3 style="margin-bottom:1rem;">➕ Naujas produktas</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="fg"><label>Pavadinimas</label><input id="p-name" placeholder="Netflix Premium"></div>
+          <div class="fg"><label>Emoji</label><input id="p-emoji" placeholder="🎬" style="max-width:80px;"></div>
+          <div class="fg"><label>Aprašymas</label><input id="p-desc" placeholder="4K Ultra HD"></div>
+          <div class="fg"><label>Kategorija</label>
+            <select id="p-cat"><option value="streaming">🎬 Streaming</option><option value="music">🎵 Muzika</option><option value="editing">✂️ Redagavimas</option><option value="other">📦 Kita</option></select>
+          </div>
+          <div class="fg"><label>Kaina (€)</label><input id="p-price" type="number" step="0.01" placeholder="5.99"></div>
+          <div class="fg"><label>Sena kaina (€)</label><input id="p-oldprice" type="number" step="0.01" placeholder="17.99"></div>
+          <div class="fg"><label>Trukmė</label><input id="p-duration" placeholder="1 mėn." value="1 mėn."></div>
+          <div class="fg"><label>Stock</label><input id="p-stock" type="number" placeholder="99" value="99"></div>
+        </div>
+        <div style="display:flex;gap:.75rem;margin-top:.5rem;">
+          <button class="btn btg" onclick="addProduct()">✅ Pridėti</button>
+          <button class="btn bto" onclick="toggleAddProduct()">Atšaukti</button>
+        </div>
+      </div>
+      <div class="pgd" id="products-grid"><div class="ld"><div class="sp"></div><span>Kraunama...</span></div></div>
+    </div>
+
+    <!-- UŽSAKYMAI -->
+    <div class="page" id="page-orders">
+      <div class="st">📦 <span>Užsakymai</span></div>
+      <div style="display:flex;gap:.75rem;margin-bottom:1.5rem;">
+        <button class="btn btg"  onclick="loadOrders('laukiama')">⏳ Laukiantys</button>
+        <button class="btn bto"  onclick="loadOrders('ivykdyta')">✅ Įvykdyti</button>
+        <button class="btn bto"  onclick="loadOrders('all')">📋 Visi</button>
+      </div>
+      <div class="tw">
+        <table><thead><tr><th>#</th><th>Narys</th><th>Produktas</th><th>Kaina</th><th>Statusas</th><th>Data</th><th>Veiksmai</th></tr></thead>
+        <tbody id="orders-table"><tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--tx2)">Kraunama...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- EKONOMIKA -->
+    <div class="page" id="page-economy">
+      <div class="st">💰 <span>Ekonomika</span></div>
+      <div class="cards">
+        <div class="card"><div class="icon">💵</div><div class="val" id="e-total">-</div><div class="lbl">Viso monetų</div></div>
+        <div class="card"><div class="icon">🏦</div><div class="val" id="e-bank">-</div><div class="lbl">Banke</div></div>
+        <div class="card"><div class="icon">📈</div><div class="val" id="e-avg">-</div><div class="lbl">Vidurkis</div></div>
+        <div class="card"><div class="icon">💸</div><div class="val" id="e-loans">-</div><div class="lbl">Paskolos</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="cw"><div class="ct">📊 Pasiskirstymas</div><canvas id="chart-econ2"></canvas></div>
+        <div class="cw"><div class="ct">🎣 Top žvejai</div><div id="fish-lb"></div></div>
+      </div>
+    </div>
+
+    <!-- BANKAS -->
+    <div class="page" id="page-bank">
+      <div class="st">🏦 <span>Bankas</span></div>
+      <div class="cards">
+        <div class="card"><div class="icon">🏦</div><div class="val" id="b-total">-</div><div class="lbl">Viso indėlių</div></div>
+        <div class="card"><div class="icon">💸</div><div class="val" id="b-loans">-</div><div class="lbl">Paskolos</div></div>
+        <div class="card"><div class="icon">📈</div><div class="val">2%</div><div class="lbl">Palūkanos/dieną</div></div>
+        <div class="card"><div class="icon">🎯</div><div class="val">10,000</div><div class="lbl">Maks. paskola</div></div>
+      </div>
+      <div class="tw">
+        <div class="th"><h3>💳 Banko operacijos</h3><button class="btn bto" onclick="loadBank()">🔄</button></div>
+        <table><thead><tr><th>Narys</th><th>Tipas</th><th>Suma</th><th>Aprašymas</th><th>Data</th></tr></thead>
+        <tbody id="bank-table"><tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--tx2)">Kraunama...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- MODERAVIMAS -->
+    <div class="page" id="page-moderation">
+      <div class="st">🛡️ <span>Moderavimas</span></div>
+      <div class="cards">
+        <div class="card"><div class="icon">⚠️</div><div class="val" id="m-warns">-</div><div class="lbl">Perspėjimai</div></div>
+        <div class="card"><div class="icon">🚨</div><div class="val">-</div><div class="lbl">Banai</div></div>
+        <div class="card"><div class="icon">🔇</div><div class="val">-</div><div class="lbl">Nutildymai</div></div>
+        <div class="card"><div class="icon">🛡️</div><div class="val" style="color:var(--ok);font-size:1.2rem;">Aktyvus</div><div class="lbl">Anti-phishing</div></div>
+      </div>
+      <div class="tw">
+        <div class="th"><h3>⚠️ Paskutiniai perspėjimai</h3><button class="btn bto" onclick="loadModeration()">🔄</button></div>
+        <table><thead><tr><th>Narys ID</th><th>Priežastis</th><th>Moderatorius</th><th>Data</th></tr></thead>
+        <tbody id="warns-table"><tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--tx2)">Kraunama...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- NUSTATYMAI -->
+    <div class="page" id="page-settings">
+      <div class="st">⚙️ <span>Nustatymai</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div class="tw" style="padding:1.5rem;">
+          <h3 style="margin-bottom:1rem;">💳 Mokėjimo būdai</h3>
+          <div id="pm-list"></div>
+          <div style="margin-top:1rem;display:flex;gap:.5rem;">
+            <select id="pm-type" style="flex:1;">
+              <option value="revolut">💜 Revolut</option><option value="paypal">💙 PayPal</option>
+              <option value="paysera">🟢 Paysera</option><option value="crypto">🪙 Crypto</option><option value="bankas">🏦 Bankas</option>
+            </select>
+            <input id="pm-val" placeholder="Duomenys..." style="flex:2;">
+            <button class="btn btg" onclick="addPM()">+</button>
+          </div>
+        </div>
+        <div class="tw" style="padding:1.5rem;">
+          <h3 style="margin-bottom:1rem;">🚫 Draudžiami žodžiai</h3>
+          <div id="bl-list" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;"></div>
+          <div style="display:flex;gap:.5rem;">
+            <input id="bl-word" placeholder="Žodis..." style="flex:1;">
+            <button class="btn btg" onclick="addBL()">+ Pridėti</button>
+          </div>
+        </div>
+        <div class="tw" style="padding:1.5rem;">
+          <h3 style="margin-bottom:1rem;">🏅 Lygių rolės</h3>
+          <div id="lr-list"></div>
+          <div style="margin-top:1rem;display:flex;gap:.5rem;">
+            <input id="lr-lvl" type="number" placeholder="Lygis" style="flex:1;">
+            <input id="lr-role" placeholder="Rolė ID" style="flex:2;">
+            <button class="btn btg" onclick="addLR()">+</button>
+          </div>
+        </div>
+        <div class="tw" style="padding:1.5rem;">
+          <h3 style="margin-bottom:1rem;">📊 Duomenų bazė</h3>
+          <div class="sr"><span class="name">Tipas</span><span class="val" id="db-type">-</span></div>
+          <div class="sr"><span class="name">Nariai</span><span class="val" id="db-members">-</span></div>
+          <div class="sr"><span class="name">Užsakymai</span><span class="val" id="db-orders">-</span></div>
+          <div class="sr"><span class="name">Ticketai</span><span class="val" id="db-tickets">-</span></div>
+          <div class="sr"><span class="name">Perspėjimai</span><span class="val" id="db-warns">-</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATISTIKA -->
+    <div class="page" id="page-stats">
+      <div class="st">📈 <span>Statistika</span></div>
+      <div class="cards">
+        <div class="card"><div class="icon">🎰</div><div class="val" id="st-casino">-</div><div class="lbl">Casino laimėjimų</div></div>
+        <div class="card"><div class="icon">🎣</div><div class="val" id="st-fish">-</div><div class="lbl">Žuvų pagauta</div></div>
+        <div class="card"><div class="icon">🏆</div><div class="val" id="st-top">-</div><div class="lbl">Turtingiausias</div></div>
+        <div class="card"><div class="icon">💹</div><div class="val" id="st-total">-</div><div class="lbl">Viso monetų</div></div>
+      </div>
+      <div class="cw"><div class="ct">👥 Top nariai pagal XP</div><canvas id="chart-xp"></canvas></div>
+      <div class="cw"><div class="ct">💰 Top nariai pagal monetas</div><canvas id="chart-coins"></canvas></div>
+    </div>
+
+  </main>
+</div>
+<div id="toast"></div>
+<script>
+const API = '';
+let guildId = '0';
+let charts  = {};
+
+// ── GUILD ──
+async function loadGuilds() {
+  const guilds = await api('/api/guilds');
+  if (guilds && guilds.length) {
+    guildId = guilds[0];
+    const sel = document.getElementById('guild-select');
+    sel.innerHTML = guilds.map(g => `<option value="${g}">${g}</option>`).join('');
+  }
+}
+function changeGuild(id) { guildId = id; refreshAll(); }
+
+// ── API ──
+async function api(url, opts={}) {
+  try {
+    const r = await fetch(url, { headers:{'Content-Type':'application/json'}, ...opts });
+    if (!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch(e) {
+    console.error(url, e);
+    return null;
+  }
+}
+
+// ── NAVIGATION ──
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if (el) el.classList.add('active');
+  loaders[name] && loaders[name]();
+}
+const loaders = {
+  dashboard:  loadDashboard,
+  members:    loadMembers,
+  leaderboard:() => loadLB('xp'),
+  tickets:    () => loadTickets('open'),
+  shop:       loadShop,
+  orders:     () => loadOrders('laukiama'),
+  economy:    loadEconomy,
+  bank:       loadBank,
+  moderation: loadModeration,
+  settings:   loadSettings,
+  stats:      loadStats,
+};
+
+function refreshAll() { const active = document.querySelector('.page.active'); if(active) loaders[active.id.replace('page-','')]?.(); loadHeader(); }
+
+// ── FORMATTERS ──
+function fmtN(n)  { return Number(n||0).toLocaleString('lt-LT'); }
+function fmtD(ts) { if(!ts) return '-'; return new Date(ts*1000).toLocaleString('lt-LT', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function fmtAgo(ts){ if(!ts) return '-'; const d=Date.now()/1000-ts; if(d<60)return 'ką tik'; if(d<3600)return Math.floor(d/60)+'min.'; if(d<86400)return Math.floor(d/3600)+'val.'; return Math.floor(d/86400)+'d.'; }
+
+function badge(s) {
+  const m = {laukiama:'by ⏳',ivykdyta:'bg ✅',atšaukta:'br ❌',open:'bg 🟢',closed:'br 🔒',normal:'bb 🟡',high:'by 🟠',urgent:'br 🔴',low:'bg 🟢'};
+  const v = m[s] || 'bb ?';
+  const [cls,...rest] = v.split(' ');
+  return `<span class="badge ${cls}">${rest.join(' ')} ${s}</span>`;
+}
+function mkChart(id, type, labels, datasets, opts={}) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(canvas, {
+    type, data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#9999bb',font:{size:11}}}},
+      scales: type!=='doughnut'&&type!=='pie'?{x:{ticks:{color:'#9999bb'},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#9999bb'},grid:{color:'rgba(255,255,255,.05)'}}}:{}, ...opts}
+  });
+}
+
+function toast(msg, type='ok') {
+  const t=document.getElementById('toast');
+  t.textContent=(type==='ok'?'✅ ':type==='er'?'❌ ':'ℹ️ ')+msg;
+  t.style.borderColor=type==='ok'?'var(--ok)':type==='er'?'var(--er)':'var(--gold)';
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── HEADER ──
+async function loadHeader() {
+  const d = await api('/api/overview');
+  if (!d) return;
+  document.getElementById('h-members').textContent = fmtN(d.members);
+  document.getElementById('h-orders').textContent  = d.orders;
+  document.getElementById('h-tickets').textContent = d.tickets;
+  document.getElementById('h-coins').textContent   = fmtN(d.total_coins)+'🪙';
+}
+
+// ── DASHBOARD ──
+async function loadDashboard() {
+  const d = await api('/api/overview');
+  if (!d) return;
+  document.getElementById('c-members').textContent  = fmtN(d.members);
+  document.getElementById('c-coins').textContent    = fmtN(d.total_coins)+' 🪙';
+  document.getElementById('c-tickets').textContent  = d.tickets;
+  document.getElementById('c-orders').textContent   = d.orders;
+  document.getElementById('c-warns').textContent    = d.warns;
+  document.getElementById('c-products').textContent = d.products;
+
+  // Charts
+  setTimeout(()=>{
+    mkChart('chart-eco','doughnut',['Piniginė','Banke','Paskolos'],[{
+      data:[d.total_coins-d.bank_total,d.bank_total,0],
+      backgroundColor:['rgba(255,215,0,.7)','rgba(65,105,225,.7)','rgba(220,20,60,.7)'],borderWidth:0
+    }]);
+    mkChart('chart-tickets','doughnut',['Atviri','Uždaryti'],[{
+      data:[d.tickets, Math.max(0,d.members-d.tickets)],
+      backgroundColor:['rgba(0,201,87,.7)','rgba(65,105,225,.7)'],borderWidth:0
+    }]);
+  },100);
+
+  // Recent orders
+  const orders = await api('/api/orders?limit=5');
+  const tbody = document.getElementById('recent-orders');
+  if (orders && orders.length) {
+    tbody.innerHTML = orders.map(o=>`<tr>
+      <td><strong>#${o.id||o.order_id||'?'}</strong></td>
+      <td>${o.username||'?'}</td>
+      <td>${o.product_name||'?'}</td>
+      <td><strong>${o.price||0}€</strong></td>
+      <td>${badge(o.status||'?')}</td>
+      <td>${fmtAgo(o.created_at||o.ts)}</td>
+      <td>${o.status==='laukiama'?`<button class="btn btgr" style="font-size:.7rem;padding:.25rem .6rem" onclick="completeOrder(${o.id})">✅</button>`:''}</td>
+    </tr>`).join('');
+  } else {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:1rem;color:var(--tx2)">Užsakymų nėra</td></tr>';
+  }
+}
+
+// ── MEMBERS ──
+let allMembers = [];
+async function loadMembers() {
+  const sort = document.getElementById('member-sort').value;
+  const data = await api(`/api/members?sort=${sort}&limit=100`);
+  allMembers = data || [];
+  renderMembers(allMembers);
+}
+function renderMembers(members) {
+  const tbody = document.getElementById('members-table');
+  if (!members.length) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--tx2)">Narių nerasta</td></tr>'; return; }
+  tbody.innerHTML = members.map(m=>{
+    const xp = m.xp||0; const lvl = Math.floor(xp/200); const pct = Math.min((xp%200)/200*100,100);
+    return `<tr>
+      <td><code style="font-size:.75rem">${m.user_id||'?'}</code></td>
+      <td><strong>${lvl}</strong></td>
+      <td><div>${fmtN(xp)}</div><div class="progress" style="margin-top:3px"><div class="pb" style="width:${pct}%"></div></div></td>
+      <td><strong>${fmtN(m.coins)}</strong> 🪙</td>
+      <td>${m.rep||0} ⭐</td>
+      <td>🔥 ${m.streak||0}</td>
+      <td>${fmtN(m.message_count||0)}</td>
+      <td>${fmtN(m.bank_balance||0)} 🪙</td>
+    </tr>`;
+  }).join('');
+}
+function filterMembers(q) {
+  const f = allMembers.filter(m=>String(m.user_id||'').includes(q));
+  renderMembers(f);
+}
+
+// ── LEADERBOARD ──
+async function loadLB(type) {
+  const data = await api(`/api/leaderboard/${type}?limit=10`);
+  const wrap = document.getElementById('lb-wrap');
+  if (!data || !data.length) { wrap.innerHTML='<div style="padding:2rem;text-align:center;color:var(--tx2)">Duomenų nėra</div>'; return; }
+  const max = data[0]?.[type] || 1;
+  wrap.innerHTML = data.map((m,i)=>{
+    const val = type==='coins'?fmtN(m[type])+' 🪙':type==='rep'?m[type]+' ⭐':fmtN(m[type])+' XP';
+    const pct = Math.min((m[type]||0)/max*100,100);
+    return `<div class="pgitem">
+      <div class="pgpos">${['🥇','🥈','🥉'][i]||(i+1)+'.'}</div>
+      <div class="pgav">${String(m.user_id||'?')[0]}</div>
+      <div class="pgname"><code style="font-size:.8rem">${m.user_id||'?'}</code></div>
+      <div class="pgbar"><div class="progress"><div class="pb" style="width:${pct}%"></div></div></div>
+      <div class="pgval">${val}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── TICKETS ──
+async function loadTickets(status='open') {
+  const stats = await api('/api/tickets/stats');
+  if (stats) {
+    document.getElementById('t-open').textContent   = stats.open||0;
+    document.getElementById('t-closed').textContent = stats.closed||0;
+    document.getElementById('t-avg').textContent    = stats.avg_minutes ? Math.round(stats.avg_minutes)+'min' : '-';
+    document.getElementById('t-rating').textContent = stats.avg_rating ? stats.avg_rating+' ⭐' : '-';
+  }
+  const tickets = await api(`/api/tickets?status=${status}&limit=30`);
+  const list = document.getElementById('tickets-list');
+  if (!tickets || !tickets.length) { list.innerHTML='<div style="padding:2rem;text-align:center;color:var(--tx2)">Ticketų nėra</div>'; return; }
+  list.innerHTML = tickets.map(t=>`
+    <div class="tc">
+      <div class="tch">
+        <span class="tid">🎫 #${t.id||t.channel_id||'?'}</span>
+        <div style="display:flex;gap:.5rem;">${badge(t.priority||'normal')} ${badge(t.status||'open')}</div>
+      </div>
+      <div class="tbody"><strong>${t.subject||t.reason||'?'}</strong></div>
+      <div class="tfoot">
+        <span>👤 ${t.user_name||t.owner_name||t.owner||'?'}</span>
+        <span>📂 ${t.category||'?'}</span>
+        <span>⏰ ${fmtAgo(t.created_at)}</span>
+        ${t.rating?`<span>⭐ ${t.rating}/5</span>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── SHOP ──
+async function loadShop() {
+  const prods = await api('/api/products');
+  document.getElementById('products-count').textContent = prods ? `${prods.length} produktai` : 'Klaida';
+  const grid = document.getElementById('products-grid');
+  if (!prods || !prods.length) { grid.innerHTML='<div style="padding:2rem;color:var(--tx2)">Produktų nėra</div>'; return; }
+  grid.innerHTML = prods.map(p=>{
+    const disc = p.old_price ? Math.round((1-p.price/p.old_price)*100) : 0;
+    return `<div class="pc">
+      <div class="pstock"><span class="badge ${p.stock>0?'bg':'br'}">${p.stock>0?'🟢':'🔴'} ${p.stock}</span></div>
+      <div class="pe">${p.emoji||'📦'}</div>
+      <div class="pn">${p.name||'?'}</div>
+      <div class="pd">${p.description||p.desc||''}</div>
+      <div class="pp">
+        <span class="pnew">${p.price||0}€</span>
+        ${p.old_price?`<span class="pold">${p.old_price}€</span><span class="pdisc">-${disc}%</span>`:''}
+      </div>
+      <div style="margin-top:.75rem;display:flex;gap:.5rem;align-items:center;">
+        <input type="number" value="${p.stock||0}" min="0" style="width:70px;padding:.3rem .5rem;font-size:.8rem;" id="stock-${p.id}" placeholder="Stock">
+        <button class="btn bto" style="font-size:.75rem;padding:.3rem .6rem;" onclick="updateStock(${p.id||p.name})">💾</button>
+        <button class="btn btr" style="font-size:.75rem;padding:.3rem .6rem;margin-left:auto" onclick="deleteProduct(${p.id})">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleAddProduct() {
+  const f = document.getElementById('add-product-form');
+  f.style.display = f.style.display==='none'?'block':'none';
+}
+async function addProduct() {
+  const name = document.getElementById('p-name').value;
+  if (!name) { toast('Įveskite pavadinimą!','er'); return; }
+  const data = {
+    name, guild_id: guildId,
+    description: document.getElementById('p-desc').value,
+    category: document.getElementById('p-cat').value,
+    emoji: document.getElementById('p-emoji').value||'📦',
+    price: parseFloat(document.getElementById('p-price').value||0),
+    old_price: parseFloat(document.getElementById('p-oldprice').value||0)||null,
+    duration: document.getElementById('p-duration').value||'1 mėn.',
+    stock: parseInt(document.getElementById('p-stock').value||99),
+  };
+  const r = await api('/api/products', {method:'POST',body:JSON.stringify(data)});
+  if (r?.success) { toast('Produktas pridėtas!'); toggleAddProduct(); loadShop(); }
+  else toast('Klaida!','er');
+}
+async function deleteProduct(id) {
+  if (!confirm('Pašalinti produktą?')) return;
+  const r = await api(`/api/products/${id}`,{method:'DELETE'});
+  if (r?.success) { toast('Pašalinta!'); loadShop(); }
+  else toast('Klaida!','er');
+}
+async function updateStock(id) {
+  const inp = document.getElementById(`stock-${id}`);
+  if (!inp) return;
+  const r = await api(`/api/products/${id}/stock`,{method:'PATCH',body:JSON.stringify({stock:parseInt(inp.value)})});
+  if (r?.success) toast('Stock atnaujintas!');
+  else toast('Klaida!','er');
+}
+
+// ── ORDERS ──
+async function loadOrders(status='laukiama') {
+  const orders = await api(`/api/orders?status=${status}&limit=50`);
+  const tbody = document.getElementById('orders-table');
+  if (!orders || !orders.length) { tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--tx2)">Užsakymų nėra</td></tr>'; return; }
+  tbody.innerHTML = orders.map(o=>`<tr>
+    <td><strong>#${o.id||'?'}</strong></td>
+    <td>${o.username||'?'}</td>
+    <td>${o.product_name||'?'} (${o.duration||'?'})</td>
+    <td><strong>${o.price||0}€</strong></td>
+    <td>${badge(o.status||'?')}</td>
+    <td>${fmtAgo(o.created_at||o.ts)}</td>
+    <td>${o.status==='laukiama'?`<button class="btn btgr" style="font-size:.75rem;padding:.3rem .6rem" onclick="completeOrder(${o.id})">✅ Įvykdyti</button>`:''}
+        <button class="btn bto" style="font-size:.75rem;padding:.3rem .6rem" onclick="toast('Užsakymas #${o.id}','info')">👁️</button></td>
+  </tr>`).join('');
+}
+async function completeOrder(id) {
+  const r = await api(`/api/orders/${id}/complete`,{method:'POST'});
+  if (r?.success) { toast(`Užsakymas #${id} įvykdytas!`); loadOrders('laukiama'); loadHeader(); }
+  else toast('Klaida!','er');
+}
+
+// ── ECONOMY ──
+async function loadEconomy() {
+  const d = await api('/api/economy/stats');
+  if (d) {
+    document.getElementById('e-total').textContent = fmtN(d.total)+' 🪙';
+    document.getElementById('e-bank').textContent  = fmtN(d.bank)+' 🪙';
+    document.getElementById('e-avg').textContent   = fmtN(d.avg)+' 🪙';
+    document.getElementById('e-loans').textContent = fmtN(d.loans)+' 🪙';
+    setTimeout(()=>mkChart('chart-econ2','doughnut',['Piniginė','Banke','Paskolos'],[{
+      data:[Math.max(0,d.total-d.bank-d.loans),d.bank,d.loans],
+      backgroundColor:['rgba(255,215,0,.7)','rgba(65,105,225,.7)','rgba(220,20,60,.7)'],borderWidth:0
+    }]),100);
+  }
+  const fish = await api('/api/fish/leaderboard?limit=5');
+  const fishDiv = document.getElementById('fish-lb');
+  if (fish && fish.length) {
+    fishDiv.innerHTML = fish.map((f,i)=>`
+      <div class="sr"><span class="name">${['🥇','🥈','🥉','4️⃣','5️⃣'][i]} <code>${f.user_id}</code></span><span class="val">${fmtN(f.total)} 🐟</span></div>
+    `).join('');
+  } else fishDiv.innerHTML='<div style="color:var(--tx2);font-size:.875rem">Dar niekas nežvejojo</div>';
+}
+
+// ── BANKAS ──
+async function loadBank() {
+  const d = await api('/api/economy/stats');
+  if (d) {
+    document.getElementById('b-total').textContent = fmtN(d.bank)+' 🪙';
+    document.getElementById('b-loans').textContent = fmtN(d.loans)+' 🪙';
+  }
+  const txs = await api('/api/bank/transactions?limit=20');
+  const tbody = document.getElementById('bank-table');
+  if (!txs || !txs.length) { tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--tx2)">Operacijų nėra</td></tr>'; return; }
+  const types = {deposit:'💚 Įnešimas',withdraw:'💸 Išėmimas',interest:'📈 Palūkanos',loan:'💳 Paskola'};
+  tbody.innerHTML = txs.map(t=>`<tr>
+    <td><code>${t.user_id}</code></td>
+    <td>${types[t.type]||t.type}</td>
+    <td><strong>${fmtN(t.amount)}</strong> 🪙</td>
+    <td>${t.description||'-'}</td>
+    <td>${fmtAgo(t.created_at)}</td>
+  </tr>`).join('');
+}
+
+// ── MODERAVIMAS ──
+async function loadModeration() {
+  const warns = await api('/api/warnings?limit=20');
+  document.getElementById('m-warns').textContent = warns ? warns.length : '-';
+  const tbody = document.getElementById('warns-table');
+  if (!warns || !warns.length) { tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--tx2)">Perspėjimų nėra</td></tr>'; return; }
+  tbody.innerHTML = warns.map(w=>`<tr>
+    <td><code>${w.user_id}</code></td>
+    <td>${w.reason||'?'}</td>
+    <td>${w.mod_name||w.mod||'?'}</td>
+    <td>${fmtAgo(w.created_at||w.ts)}</td>
+  </tr>`).join('');
+}
+
+// ── NUSTATYMAI ──
+async function loadSettings() {
+  const s = await api(`/api/settings/${guildId}`);
+  if (!s) return;
+
+  // Payment methods
+  const pm = s.payment_methods || {};
+  const pmIcons = {revolut:'💜',paypal:'💙',paysera:'🟢',crypto:'🪙',bankas:'🏦'};
+  document.getElementById('pm-list').innerHTML = Object.entries(pm).map(([k,v])=>`
+    <div class="sr">
+      <span class="name">${pmIcons[k]||'💳'} ${k}</span>
+      <div style="display:flex;align-items:center;gap:.5rem;">
+        <code style="background:var(--bg4);padding:.2rem .5rem;border-radius:4px;font-size:.8rem">${v}</code>
+        <button class="btn btr" style="font-size:.7rem;padding:.2rem .4rem" onclick="removePM('${k}')">🗑️</button>
+      </div>
+    </div>
+  `).join('') || '<div style="color:var(--tx2);font-size:.875rem">Nėra mokėjimo būdų</div>';
+
+  // Blacklist
+  const bl = s.blacklist || [];
+  const blDiv = document.getElementById('bl-list');
+  blDiv.innerHTML = bl.map(w=>`<span style="background:var(--bg4);padding:.2rem .6rem;border-radius:6px;font-size:.8rem;display:inline-flex;align-items:center;gap:.4rem">${w} <span onclick="removeBL('${w}')" style="cursor:pointer;color:var(--er)">×</span></span>`).join('');
+
+  // Level rewards
+  const lr = s.level_rewards || {};
+  document.getElementById('lr-list').innerHTML = Object.entries(lr).map(([lvl,role])=>`
+    <div class="sr"><span class="name">Lygis ${lvl}</span><span class="val">${role}</span></div>
+  `).join('') || '<div style="color:var(--tx2);font-size:.875rem">Nėra lygių rolių</div>';
+
+  // DB stats
+  const ov = await api('/api/overview');
+  if (ov) {
+    document.getElementById('db-type').textContent    = 'SQLite ✅';
+    document.getElementById('db-members').textContent = ov.members;
+    document.getElementById('db-orders').textContent  = ov.orders+' laukia';
+    document.getElementById('db-tickets').textContent = ov.tickets+' atvirų';
+    document.getElementById('db-warns').textContent   = ov.warns;
+  }
+}
+async function addPM() {
+  const type = document.getElementById('pm-type').value;
+  const val  = document.getElementById('pm-val').value.trim();
+  if (!val) { toast('Įveskite duomenis!','er'); return; }
+  const s = await api(`/api/settings/${guildId}`);
+  const pm = s?.payment_methods || {};
+  pm[type] = val;
+  await api(`/api/settings/${guildId}`,{method:'PATCH',body:JSON.stringify({payment_methods:pm})});
+  toast(`${type} pridėtas!`);
+  document.getElementById('pm-val').value='';
+  loadSettings();
+}
+async function removePM(k) {
+  const s = await api(`/api/settings/${guildId}`);
+  const pm = s?.payment_methods || {};
+  delete pm[k];
+  await api(`/api/settings/${guildId}`,{method:'PATCH',body:JSON.stringify({payment_methods:pm})});
+  toast(`${k} pašalintas.`); loadSettings();
+}
+async function addBL() {
+  const w = document.getElementById('bl-word').value.trim().toLowerCase();
+  if (!w) return;
+  const s = await api(`/api/settings/${guildId}`);
+  const bl = s?.blacklist || [];
+  if (!bl.includes(w)) bl.push(w);
+  await api(`/api/settings/${guildId}`,{method:'PATCH',body:JSON.stringify({blacklist:bl})});
+  toast(`"${w}" pridėtas!`);
+  document.getElementById('bl-word').value='';
+  loadSettings();
+}
+async function removeBL(w) {
+  const s = await api(`/api/settings/${guildId}`);
+  const bl = (s?.blacklist||[]).filter(x=>x!==w);
+  await api(`/api/settings/${guildId}`,{method:'PATCH',body:JSON.stringify({blacklist:bl})});
+  toast(`"${w}" pašalintas.`); loadSettings();
+}
+async function addLR() {
+  const lvl  = document.getElementById('lr-lvl').value;
+  const role = document.getElementById('lr-role').value.trim();
+  if (!lvl||!role) { toast('Užpildykite laukus!','er'); return; }
+  const s = await api(`/api/settings/${guildId}`);
+  const lr = s?.level_rewards||{};
+  lr[lvl] = role;
+  await api(`/api/settings/${guildId}`,{method:'PATCH',body:JSON.stringify({level_rewards:lr})});
+  toast(`Lygis ${lvl} → ${role} pridėtas!`);
+  document.getElementById('lr-lvl').value='';
+  document.getElementById('lr-role').value='';
+  loadSettings();
+}
+
+// ── STATS ──
+async function loadStats() {
+  const econ = await api('/api/economy/stats');
+  if (econ) {
+    document.getElementById('st-total').textContent = fmtN(econ.total)+' 🪙';
+    document.getElementById('st-top').textContent   = fmtN(econ.top)+' 🪙';
+  }
+  document.getElementById('st-casino').textContent = '-';
+  document.getElementById('st-fish').textContent   = '-';
+
+  // XP chart
+  const lb = await api('/api/leaderboard/xp?limit=10');
+  if (lb && lb.length) {
+    setTimeout(()=>{
+      mkChart('chart-xp','bar',
+        lb.map(m=>String(m.user_id).slice(-6)),
+        [{label:'XP',data:lb.map(m=>m.xp||0),backgroundColor:'rgba(255,215,0,.7)',borderColor:'#FFD700',borderWidth:2,borderRadius:6}]
+      );
+    },100);
+  }
+  const lbc = await api('/api/leaderboard/coins?limit=10');
+  if (lbc && lbc.length) {
+    setTimeout(()=>{
+      mkChart('chart-coins','bar',
+        lbc.map(m=>String(m.user_id).slice(-6)),
+        [{label:'Monetos',data:lbc.map(m=>m.coins||0),backgroundColor:'rgba(65,105,225,.7)',borderColor:'#4169e1',borderWidth:2,borderRadius:6}]
+      );
+    },150);
+  }
+}
+
+// ── INIT ──
+async function init() {
+  await loadGuilds();
+  await loadHeader();
+  loadDashboard();
+  setInterval(loadHeader, 30000);
+}
+init();
+</script>
+</body>
+</html>
